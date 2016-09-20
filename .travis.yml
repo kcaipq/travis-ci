@@ -21,11 +21,11 @@ branches:
     - master
     - /^ICT-.*$/
 
-before_install:
+before_script:
+  - cp -n $TRAVIS_BUILD_DIR/.env.example $TRAVIS_BUILD_DIR/.env
   - sbt ++$TRAVIS_SCALA_VERSION dockerComposeRestart;
 
 script:
-  - cp -n .env.example .env
   - sbt ++$TRAVIS_SCALA_VERSION test;
 
 after_script:
