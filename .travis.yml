@@ -25,6 +25,7 @@ before_install:
   - sbt ++$TRAVIS_SCALA_VERSION dockerComposeRestart;
 
 script:
+  - cp -n .env.example .env
   - sbt ++$TRAVIS_SCALA_VERSION test;
 
 after_script:
