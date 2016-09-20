@@ -1,4 +1,7 @@
-sudo: false
+sudo: required
+
+services:
+  - docker
 
 language: scala
 
@@ -17,3 +20,9 @@ branches:
   only:
     - master
     - /^[0-9]+\.[0-9]+\.[0-9]+$/
+
+before_install:
+  - sbt ++$TRAVIS_SCALA_VERSION dockerComposeRestart;
+
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION test;
