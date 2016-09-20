@@ -19,10 +19,13 @@ jdk:
 branches:
   only:
     - master
-    - /^[0-9]+\.[0-9]+\.[0-9]+$/
+    - /^ICT-.*$/
 
 before_install:
   - sbt ++$TRAVIS_SCALA_VERSION dockerComposeRestart;
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION test;
+
+after_script:
+  - sbt ++$TRAVIS_SCALA_VERSION dockerComposeStop;
