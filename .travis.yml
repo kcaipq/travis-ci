@@ -24,6 +24,7 @@ branches:
 before_script:
   - cp -n $TRAVIS_BUILD_DIR/.env.example $TRAVIS_BUILD_DIR/.env
   - sbt ++$TRAVIS_SCALA_VERSION dockerComposeRestart;
+  - docker inspect --format '{{ .NetworkSettings.IPAddress }}' ${docker ps -ps "name=kafka"}
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION test;
