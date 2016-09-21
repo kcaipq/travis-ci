@@ -1,0 +1,44 @@
+sudo: required
+
+services:
+  - docker
+
+language: scala
+
+cache:
+  directories:
+    - "$HOME/.ivy2"
+    - "$HOME/.sbt"
+
+scala:
+  - 2.11.8
+
+jdk:
+  - oraclejdk8
+
+branches:
+  only:
+    - master
+    - /^ICT-.*$/
+
+before_script:
+  - cp -n $TRAVIS_BUILD_DIR/.env.example $TRAVIS_BUILD_DIR/.env
+  - sudo service docker stop
+  - if [ "$(ls -A /home/travis/docker)" ]; then echo "/home/travis/docker already set"; else sudo mv /var/lib/docker /home/travis/docker; fi
+  - sudo bash -c "echo 'DOCKER_OPTS=\"-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -g /home/travis/docker\"' > /etc/default/docker"
+  - sudo service docker start
+  - sbt ++$TRAVIS_SCALA_VERSION dockerComposeRestart;
+
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION -jvm-opts travisci/jvmopts test;
+
+before_cache:
+  - sudo service docker stop
+  - sudo chown -R travis ~/docker
+
+cache:
+  directories:
+    ~/docker
+
+after_script:
+  - sbt ++$TRAVIS_SCALA_VERSION dockerComposeStop;
