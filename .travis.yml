@@ -22,10 +22,11 @@ branches:
     - /^ICT-.*$/
 
 before_install:
-  #- if [ -f ${DOCKER_CACHE_FILE} ]; then gunzip -c ${DOCKER_CACHE_FILE} | docker load; fi
-  #- if [ -f ${DOCKER_JAVA_FILE} ]; then gunzip -c ${DOCKER_JAVA_FILE} | docker load; fi
   - if [[ -e ~/docker/postgres.tar ]]; then docker load -i ~/docker/postgres.tar; fi
   - if [[ -e ~/docker/java.tar ]]; then docker load -i ~/docker/java.tar; fi
+  - if [[ -e ~/docker/kafka.tar ]]; then docker load -i ~/docker/kafka.tar; fi
+  - if [[ -e ~/docker/zookeeper.tar ]]; then docker load -i ~/docker/zookeeper.tar; fi
+  - if [[ -e ~/docker/feed.tar ]]; then docker load -i ~/docker/feed.tar; fi
 
 before_script:
   - cp -n $TRAVIS_BUILD_DIR/.env.example $TRAVIS_BUILD_DIR/.env
@@ -33,15 +34,12 @@ before_script:
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION -jvm-opts travisci/jvmopts test;
-  #- if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-  #  mkdir -p $(dirname ${DOCKER_CACHE_FILE});
-  #  docker save $(docker history -q postgres:latest | grep -v '<missing>') | gzip > ${DOCKER_CACHE_FILE};
-  #  mkdir -p $(dirname ${DOCKER_JAVA_FILE});
-  #  docker save $(docker history -q java:latest | grep -v '<missing>') | gzip > ${DOCKER_JAVA_FILE};
-  #  fi
   - mkdir -p ~/docker;
   - docker save $(docker history -q postgres:latest | grep -v '<missing>') > ~/docker/postgres.tar
   - docker save $(docker history -q java:latest | grep -v '<missing>') > ~/docker/java.tar
+  - docker save $(docker history -q wurstmeister/kafka:latest | grep -v '<missing>') > ~/docker/kafka.tar
+  - docker save $(docker history -q wurstmeister/zookeeper:latest | grep -v '<missing>') > ~/docker/zookeeper.tar
+  - docker save $(docker history -q ekino/wiremock:latest | grep -v '<missing>') > ~/docker/feed.tar
   - find $HOME/.sbt -name "*.lock" | xargs rm 
   - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
 
@@ -58,8 +56,3 @@ cache:
 
 after_script:
   - sbt ++$TRAVIS_SCALA_VERSION dockerComposeStop;
-
-env:
-  global:
-    - DOCKER_CACHE_FILE=${HOME}/docker/postgres.tar
-    - DOCKER_JAVA_FILE=${HOME}/docker/java.tar
