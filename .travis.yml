@@ -27,6 +27,11 @@ before_install:
   - if [[ -e ~/docker/kafka.tar ]]; then docker load -i ~/docker/kafka.tar; fi
   - if [[ -e ~/docker/zookeeper.tar ]]; then docker load -i ~/docker/zookeeper.tar; fi
   - if [[ -e ~/docker/feed.tar ]]; then docker load -i ~/docker/feed.tar; fi
+  - IFS=',' read -r -a array <<< "java,test/postgres,exmaple/kafka,cool/zookeeper,wake/feed"; 
+    for i in "${array[@]}"
+    do
+    echo "${i#*/}"
+    done
 
 before_script:
   - cp -n $TRAVIS_BUILD_DIR/.env.example $TRAVIS_BUILD_DIR/.env
