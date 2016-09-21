@@ -30,7 +30,7 @@ before_script:
   - sbt ++$TRAVIS_SCALA_VERSION dockerComposeRestart;
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION -jvm-opts travis/jvmopts test;
+  - sbt ++$TRAVIS_SCALA_VERSION -jvm-opts travisci/jvmopts test;
 
 before_cache:
   - sudo service docker stop
