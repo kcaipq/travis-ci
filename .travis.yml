@@ -30,3 +30,8 @@ script:
 
 after_script:
   - sbt ++$TRAVIS_SCALA_VERSION dockerComposeStop;
+
+notifications:
+  email:
+    on_success: always
+    on_failure: always
