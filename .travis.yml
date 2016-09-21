@@ -32,10 +32,8 @@ before_script:
 script:
   - sbt ++$TRAVIS_SCALA_VERSION -jvm-opts travisci/jvmopts test;
   - if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-    #postgres image
     mkdir -p $(dirname ${DOCKER_CACHE_FILE});
     docker save $(docker history -q postgres:latest | grep -v '<missing>') | gzip > ${DOCKER_CACHE_FILE};
-    #java image
     mkdir -p $(dirname ${DOCKER_JAVA_FILE});
     docker save $(docker history -q java:latest | grep -v '<missing>') | gzip > ${DOCKER_JAVA_FILE};
     fi
