@@ -24,11 +24,9 @@ branches:
 before_script:
   - cp -n $TRAVIS_BUILD_DIR/.env.example $TRAVIS_BUILD_DIR/.env
   - sbt ++$TRAVIS_SCALA_VERSION dockerComposeRestart;
-  - $ETL_MACHINE_ID = docker ps -ps "name=kafka"
-  - docker inspect --format '{{ .NetworkSettings.IPAddress }}' $ETL_MACHINE_ID
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION test;
+  - sbt ++$TRAVIS_SCALA_VERSION -jvm-opts travis/jvmopts test;
 
 after_script:
   - sbt ++$TRAVIS_SCALA_VERSION dockerComposeStop;
