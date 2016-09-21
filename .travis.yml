@@ -27,7 +27,7 @@ before_install:
 
 before_script:
   - cp -n $TRAVIS_BUILD_DIR/.env.example $TRAVIS_BUILD_DIR/.env
-  #- sbt ++$TRAVIS_SCALA_VERSION dockerComposeRestart;
+  - sbt ++$TRAVIS_SCALA_VERSION dockerComposeRestart;
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION -jvm-opts travisci/jvmopts test;
@@ -51,8 +51,8 @@ cache:
     - $HOME/.ivy2/cache 
     - $HOME/.sbt/boot/
 
-#after_script:
-  #- sbt ++$TRAVIS_SCALA_VERSION dockerComposeStop;
+after_script:
+  - sbt ++$TRAVIS_SCALA_VERSION dockerComposeStop;
 
 env:
   global:
