@@ -26,12 +26,14 @@ before_install:
   - IFS=',' read -r -a images <<< $DOCKER_IMAGES;
     for i in "${images[@]}";
     do
-      if [[ -e $HOME/docker/${i#*/}.tar ]]; then docker load -i $HOME/docker/"${i#*/}".tar; fi
+      if [[ ( -e $HOME/docker/${i#*/}.tar ) && ( "$DO_E2E_TESTS" = true ) ]]; then docker load -i $HOME/docker/"${i#*/}".tar; fi
     done
 
 before_script:
   - cp -n $TRAVIS_BUILD_DIR/.env.example $TRAVIS_BUILD_DIR/.env
-  - sbt ++$TRAVIS_SCALA_VERSION dockerComposeRestart;
+  - if [[ ( "$DO_E2E_TESTS" = true ) ]]; then
+      sbt ++$TRAVIS_SCALA_VERSION dockerComposeRestart;
+    fi
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION -jvm-opts travisci/jvmopts test;
@@ -39,7 +41,7 @@ script:
   - IFS=',' read -r -a images <<< $DOCKER_IMAGES;
     for i in "${images[@]}";
     do
-      if [[ ! -e $HOME/docker/${i#*/}.tar ]]; then docker save $(docker history -q $i:latest | grep -v '<missing>') > $HOME/docker/${i#*/}.tar; fi
+      if [[ ( ! -e $HOME/docker/${i#*/}.tar ) && ( "$DO_E2E_TESTS" = true ) ]]; then docker save $(docker history -q $i:latest | grep -v '<missing>') > $HOME/docker/${i#*/}.tar; fi
     done
   - find $HOME/.sbt -name "*.lock" | xargs rm 
   - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
@@ -56,9 +58,14 @@ cache:
     - $HOME/.sbt/boot/
 
 after_script:
-  - sbt ++$TRAVIS_SCALA_VERSION dockerComposeStop;
+  - if [[ ( "$DO_E2E_TESTS" = true ) ]]; then
+      sbt ++$TRAVIS_SCALA_VERSION dockerComposeStop;
+    fi
 
 env:
   global:
     - DOCKER_IMAGES=java,postgres,wurstmeister/kafka,wurstmeister/zookeeper,ekino/wiremock
     - DOWNLOAD_DOCKER_IMAGE=false
+  matrix:
+    - DO_E2E_TESTS=true
+    - DO_E2E_TESTS=false
