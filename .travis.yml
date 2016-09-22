@@ -39,9 +39,7 @@ script:
   - IFS=',' read -r -a images <<< $DOCKER_IMAGES;
     for i in "${images[@]}";
     do
-      if [[ ! -e $HOME/docker/${i#*/}.tar ]]; then
-        docker save $(docker history -q $i:latest | grep -v '<missing>') > $HOME/docker/${i#*/}.tar
-      fi
+      if [[ ! -e $HOME/docker/${i#*/}.tar ]]; then docker save $(docker history -q $i:latest | grep -v '<missing>') > $HOME/docker/${i#*/}.tar; fi
     done
   - find $HOME/.sbt -name "*.lock" | xargs rm 
   - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
@@ -64,3 +62,6 @@ env:
   global:
     - DOCKER_IMAGES=java,postgres,wurstmeister/kafka,wurstmeister/zookeeper,ekino/wiremock
     - DOWNLOAD_DOCKER_IMAGE=false
+  matrix:
+    - DO_E2E_TESTS=true
+    - DO_E2E_TESTS=false
