@@ -22,15 +22,11 @@ branches:
     - /^ICT-.*$/
 
 before_install:
-  - if [[ -e ~/docker/postgres.tar ]]; then docker load -i ~/docker/postgres.tar; fi
-  - if [[ -e ~/docker/java.tar ]]; then docker load -i ~/docker/java.tar; fi
-  - if [[ -e ~/docker/kafka.tar ]]; then docker load -i ~/docker/kafka.tar; fi
-  - if [[ -e ~/docker/zookeeper.tar ]]; then docker load -i ~/docker/zookeeper.tar; fi
-  - if [[ -e ~/docker/feed.tar ]]; then docker load -i ~/docker/feed.tar; fi
-  - IFS=',' read -r -a array <<< "java,test/postgres,exmaple/kafka,cool/zookeeper,wake/feed"; 
-    for i in "${array[@]}";
+  - IF [["$DOWNLOAD_DOCKER_IMAGE" = true] && [ -d "$HOME/docker"]]; then rm -rf $HOME/docker/*.tar; fi
+  - IFS=',' read -r -a images <<< $DOCKER_IMAGES;
+    for i in "${images[@]}";
     do
-    echo "${i#*/}";
+      if [[ -e $HOME/docker/${i#*/}.tar ]]; then docker load -i $HOME/docker/"${i#*/}".tar; fi
     done
 
 before_script:
@@ -39,12 +35,14 @@ before_script:
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION -jvm-opts travisci/jvmopts test;
-  - mkdir -p ~/docker;
-  - docker save $(docker history -q postgres:latest | grep -v '<missing>') > ~/docker/postgres.tar
-  - docker save $(docker history -q java:latest | grep -v '<missing>') > ~/docker/java.tar
-  - docker save $(docker history -q wurstmeister/kafka:latest | grep -v '<missing>') > ~/docker/kafka.tar
-  - docker save $(docker history -q wurstmeister/zookeeper:latest | grep -v '<missing>') > ~/docker/zookeeper.tar
-  - docker save $(docker history -q ekino/wiremock:latest | grep -v '<missing>') > ~/docker/feed.tar
+  - mkdir -p $HOME/docker;
+  - IFS=',' read -r -a images <<< $DOCKER_IMAGES;
+    for i in "${images[@]}";
+    do
+      if [[ ! -e $HOME/docker/${i#*/}.tar ]]; then
+        docker save $(docker history -q $i:latest | grep -v '<missing>') > $HOME/docker/${i#*/}.tar
+      fi
+    done
   - find $HOME/.sbt -name "*.lock" | xargs rm 
   - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
 
@@ -61,3 +59,8 @@ cache:
 
 after_script:
   - sbt ++$TRAVIS_SCALA_VERSION dockerComposeStop;
+
+env:
+  global:
+    - DOCKER_IMAGES=java,postgres,wurstmeister/kafka,wurstmeister/zookeeper,ekino/wiremock
+    - DOWNLOAD_DOCKER_IMAGE=false
