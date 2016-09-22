@@ -62,6 +62,3 @@ env:
   global:
     - DOCKER_IMAGES=java,postgres,wurstmeister/kafka,wurstmeister/zookeeper,ekino/wiremock
     - DOWNLOAD_DOCKER_IMAGE=false
-  matrix:
-    - DO_E2E_TESTS=true
-    - DO_E2E_TESTS=false
