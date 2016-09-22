@@ -41,7 +41,10 @@ script:
   - IFS=',' read -r -a images <<< $DOCKER_IMAGES;
     for i in "${images[@]}";
     do
-      if [[ ( ! -e $HOME/docker/${i#*/}.tar ) && ( "$DO_E2E_TESTS" = true ) ]]; then docker save $(docker history -q $i:latest | grep -v '<missing>') > $HOME/docker/${i#*/}.tar; fi
+    container=$(docker history -q $i:latest | grep -v '<missing>');
+    if [[ ( ! -e $HOME/docker/${i#*/}.tar ) && ( -n "$container" ) ]]; then
+      docker save $container > $HOME/docker/${i#*/}.tar;
+    fi
     done
   - find $HOME/.sbt -name "*.lock" | xargs rm 
   - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
