@@ -22,7 +22,7 @@ branches:
     - /^ICT-.*$/
 
 before_install:
-  - IF [["$DOWNLOAD_DOCKER_IMAGE" = true] && [ -d "$HOME/docker"]]; then rm -rf $HOME/docker/*.tar; fi
+  - if [[ ( "$DOWNLOAD_DOCKER_IMAGE" = true ) && ( -d "$HOME/docker" ) ]]; then rm -rf $HOME/docker/*.tar; fi
   - IFS=',' read -r -a images <<< $DOCKER_IMAGES;
     for i in "${images[@]}";
     do
