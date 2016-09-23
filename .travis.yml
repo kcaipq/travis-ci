@@ -22,11 +22,11 @@ branches:
     - /^ICT-.*$/
 
 before_install:
-  - if [[ ( "$DOWNLOAD_DOCKER_IMAGE" = true ) && ( -d "$HOME/docker" ) ]]; then rm -rf $HOME/docker/*.tar; fi
+  - if [[ ( "$DOWNLOAD_DOCKER_IMAGE" = true ) && ( -d "$HOME/docker" ) ]]; then rm -rf $HOME/docker/*.tar.gz; fi
   - IFS=',' read -r -a images <<< $DOCKER_IMAGES;
     for i in "${images[@]}";
     do
-      if [[ ( -e $HOME/docker/${i#*/}.tar ) && ( "$DO_E2E_TESTS" = true ) ]]; then docker load -i $HOME/docker/"${i#*/}".tar; fi
+      if [[ ( -e $HOME/docker/${i#*/}.tar.gz ) && ( "$DO_E2E_TESTS" = true ) ]]; then gunzip -c $HOME/docker/"${i#*/}".tar.gz | docker load; fi
     done
 
 before_script:
@@ -42,8 +42,8 @@ script:
     for i in "${images[@]}";
     do
     container=$(docker history -q $i:latest | grep -v '<missing>');
-    if [[ ( ! -e $HOME/docker/${i#*/}.tar ) && ( -n "$container" ) ]]; then
-      docker save $container > $HOME/docker/${i#*/}.tar;
+    if [[ ( ! -e $HOME/docker/${i#*/}.tar.gz ) && ( -n "$container" ) ]]; then
+      docker save $container | gzip > $HOME/docker/${i#*/}.tar.gz;
     fi
     done
   - find $HOME/.sbt -name "*.lock" | xargs rm 
